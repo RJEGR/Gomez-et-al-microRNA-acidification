@@ -2,7 +2,7 @@
 
 Reproducibility repository for the manuscript:
 
-> **Stage-specific microRNA turnover and the respiratory cost of early development in red abalone (*Haliotis rufescens*) larvae under ocean acidification**
+> **A microRNA catalogue for red abalone larvae shows intergenic and intragenic contributions to the response to ocean acidification**
 > R. Gómez-Reyes et al. *Marine Biotechnology* (under revision).
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22709806.svg)](https://doi.org/10.5281/zenodo.22709806)
