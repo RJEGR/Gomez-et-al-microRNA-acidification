@@ -7,7 +7,7 @@ Reproducibility repository for the manuscript:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
-This repository contains the code and the analysis workflow needed to reproduce every table and figure in the manuscript, from the archived intermediate data objects through to the final figures. It is a curated, publication-focused release derived from the working repository [`RJEGR/Small-RNASeq-data-analysis`](https://github.com/RJEGR/Small-RNASeq-data-analysis). Public repository: https://github.com/RJEGR/microRNA-abalone-acidification
+This repository contains the code and the analysis workflow needed to reproduce every table and figure in the manuscript, from the archived intermediate data objects through to the final figures. It is a curated, publication-focused release derived from the working repository [`RJEGR/Small-RNASeq-data-analysis`](https://github.com/RJEGR/Small-RNASeq-data-analysis). Public repository: https://github.com/RJEGR/Gomez-et-al-microRNA-acidification
 
 ---
 
@@ -28,7 +28,7 @@ The Zenodo archive bundles the ShortStack count matrix, the annotated miRNA sequ
 ## 2. Repository layout
 
 ```
-microRNA-abalone-acidification/
+Gomez-et-al-microRNA-acidification/
 ├── README.md
 ├── LICENSE                     # MIT
 ├── config.R                    # central paths & parameters (single source of truth)
