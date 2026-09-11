@@ -1,0 +1,13 @@
+LIBRARY_ID	colName	hpf	pH	Replicate	CONTRAST_A	CONTRAST_B	CONTRAST_C	CONTRAST_D
+HR110761	HR11076	110	Low	1	NA	Low	NA	Competent
+HR110762	HR11076	110	Low	2	NA	Low	NA	Competent
+HR110763	HR11076	110	Low	3	NA	Low	NA	Competent
+HR11081	HR1108	110	Control	1	NA	Control	Competent	NA
+HR11082	HR1108	110	Control	2	NA	Control	Competent	NA
+HR11083	HR1108	110	Control	3	NA	Control	Competent	NA
+HR24761	HR2476	24	Low	1	Low	NA	NA	Control
+HR24762	HR2476	24	Low	2	Low	NA	NA	Control
+HR24763	HR2476	24	Low	3	Low	NA	NA	Control
+HR2481	HR248	24	Control	1	Control	NA	Control	NA
+HR2482	HR248	24	Control	2	Control	NA	Control	NA
+HR2483	HR248	24	Control	3	Control	NA	Control	NA
