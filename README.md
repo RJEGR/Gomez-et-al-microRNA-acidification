@@ -5,7 +5,7 @@ Reproducibility repository for the manuscript:
 > **Stage-specific microRNA turnover and the respiratory cost of early development in red abalone (*Haliotis rufescens*) larvae under ocean acidification**
 > R. Gómez-Reyes et al. *Marine Biotechnology* (under revision).
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22709806.svg)](https://doi.org/10.5281/zenodo.22709806)
 
 This repository contains the code and the analysis workflow needed to reproduce every table and figure in the manuscript, from the archived intermediate data objects through to the final figures. It is a curated, publication-focused release derived from the working repository [`RJEGR/Small-RNASeq-data-analysis`](https://github.com/RJEGR/Small-RNASeq-data-analysis). Public repository: https://github.com/RJEGR/Gomez-et-al-microRNA-acidification
 
