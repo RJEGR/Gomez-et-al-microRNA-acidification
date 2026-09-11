@@ -1,0 +1,75 @@
+================================================================================
+ data/MANIFEST — deposit checklist for microRNA-abalone-acidification
+================================================================================
+Purpose: single source of truth for WHERE every data object lives and what
+uses it. Four tiers:
+  [REPO]   already in this repo's data/ (small; ships with the code)
+  [ZENODO] large / raw -> upload to the Zenodo release, then cite the DOI
+  [FAIR]   public/community resource or regenerable -> NOT deposited (fetch from source)
+  [SRA]    already public in the NCBI Sequence Read Archive
+
+Sizes are the current on-disk sizes (2026-09-11). Check a box when uploaded.
+Zenodo record should also contain: this repo's tagged release (GitHub->Zenodo),
+the README, and the raw water-chemistry + respirometry measurements.
+--------------------------------------------------------------------------------
+
+## [SRA] Sequence archives (already public — cite accessions, do NOT re-upload)
+- raw small RNA-seq reads, 12 libraries ............ SRA BioProject PRJNA1354232
+- reference transcriptome RNA-seq libraries ........ SRA BioProject PRJNA488641 (Masonbrink et al. 2019)
+- nuclear genome GCA_023055435.1 ; mito JALGQA010000616.1
+
+## [REPO] Already bundled in data/ (analysis-ready; no action)
+  file                                              size    used by
+  prof_by_read_length_summary.tsv (+ .rds)          170K    figures/FIGURE_1, FIGURE_2 ; Table 2
+  IDENTICAL_SEQUENCES_MERGED_COUNT.rds               16K    figures/PCA*, 03_diffexp
+  ALL_117_miRNAs_4contrasts.tsv                      28K    figures/FIG_S1_redesign
+  METADATA.tsv ; METADATA_MICRORNAS.tsv              4K ea  03_diffexp, figures, FIG_S1
+  SRNA2MIRGENEDB.tsv                                180K    03_diffexp (MirGeneDB id map)
+  MIRGENEDB_2.1.tsv                                 1.9M    figures/FIGURE_1
+  RNA_LOCATION_MIR_DB.rds                            92K    figures/FIGURE_1, 04 JOIN
+  LONGER_RELATIONAL_DB.tsv                          280K    Table 3, Fig 3, Fig 2C/D
+  Gene_ontologies_DB.tsv                             96K    Fig 2D (topGO)
+  Boostrap_topGO_intra_inter_reconstructed.tsv      124K    Fig 2D (reconstructed viz)
+  target_prediction/mature_star_...targetscan.out   2.1M    02_targets (TargetScan overlap = pre->post bridge)
+  water_chemistry/quimicas*.{csv,tsv} + CO2_sys_inputs.tsv   4K ea  Tables S1/S2 (06_water_chemistry)
+  05_respirometry/data_input/Abulon_*.xlsx + MTD_RESPIROMETRY.csv + conteos_abs_respirometrias.csv   ~0.9M total   Table 1 (05_respirometry)
+
+## [ZENODO] Upload to the Zenodo release (too large for git) — DEPOSIT CHECKLIST
+  [ ] Results.txt ................................... 12M    ShortStack count matrix -> 03_diffexp, Fig 1        (core)
+  [ ] Counts.txt ................................... 5.1M    ShortStack per-sample counts -> 03_diffexp (input)  (core)
+  [ ] Results.gff3 ................................. 6.8M    miRNA genomic coordinates -> Fig 1D, 01_loci        (core)
+  [ ] RNA_LOCATION_DB.tsv ........................... 15M    locus DB -> 01_loci, Fig 2C, 03_diffexp, 04         (core)
+  [ ] SRNA_REGULATORY_FUNCTION_DB.tsv .............. ~1.9M   post-intersection targets -> Table 3, Fig 3, 02/04  (core)
+  [ ] SEQUENCES_MERGED_DESEQ_RES.tsv ................ 72K    DESeq2 results 4 contrasts -> Table 3, Fig 3        (core; small, may also go in data/)
+  [ ] gene_count_matrix.csv ........................ 2.8M    StringTie mRNA counts -> 02_targets (target expr.)  (core)
+  [ ] transcript_count_matrix.csv .................. 8.6M    StringTie transcript counts -> 02_targets           (core)
+  [ ] genome_features.rds ........................... 9.0M   gene<->transcript + descriptions -> 04 JOIN, 01/02  (core)
+  [ ] mir.fasta ..................................... 44K    miRNA mature/star sequences -> Fig 1                (core; small)
+  [ ] MajorRNA.fasta ; KNOWN_AND_NOVEL_MIRS_MajorRNA.fasta   36K   miRNA sequences                              (core; small)
+  [ ] alignment_details.tsv ......................... 24K    per-library alignment stats -> Table 2, Fig 1       (core; small)
+  [ ] emapper_annotation_dir/ (ONLY_miRNA_loci_dir + ONLY_miRNA_mRNA_dir)   3.5M   eggNOG + DIAMOND-blastx-vs-STRING (9606/6239) -> 04 JOIN/STRING   (core)
+  [ ] mir_vs_utr_rmdup_RNAhybrid.out.tsv ........... 2.5G    RAW RNAhybrid (pre-intersection) -> 02_targets      (raw; GZIP before upload -> ~a few hundred MB)
+  [ ] knownRNAs.gff3 ............................... 263M    ShortStack known-RNA annotation                     (raw/optional; gzip)
+  [ ] transcripts.gtf .............................. 175M    StringTie assembled transcripts                     (raw/optional; gzip)
+  [ ] multi_genome.newid_repeat_masked.gff3 ........ 128M    repeat-masked genome annotation -> 01_loci          (raw/optional; gzip)
+  [ ] merged_alignments.bam ........................ 669M    merged ShortStack alignments                        (raw/optional; or point to SRA)
+
+## [FAIR] NOT deposited — fetch from the primary source (documented in README §6-§7)
+  - Ensembl Metazoa genome + GTF + 3'UTRs (utr_rmdup.fa / three_prime_utr.fa) + multi_genome.newid.fa
+        source: https://metazoa.ensembl.org/info/data/ftp/  (process with seqkit)
+  - STRING v12.0 protein.links.full.v12.0.txt + protein.info.v12.0.txt
+        source: https://string-db.org/cgi/download  (process with 04_annotation_go/3_STRING-db.R)
+  - clade-specific_miRNA_families_of_animal_clades.txt  -> secondary output of miRTrace v1.0.1
+  - org.Hs.eg.db (GOSemSim data for topGO)  -> Bioconductor
+  - Regenerable intermediates: SEQUENCES_MERGED_DDS_DESEQ2.rds, SRNA_FUNCTION_PREDICTED_LONG_EXPRESSED.rds,
+        LOCI2TARGETDB.tsv, SEQUENCES_MERGED_DESEQ_RES_WGCNA.rds  (produced by the repo's own scripts)
+
+--------------------------------------------------------------------------------
+Notes
+ - "core" = needed to re-run the R modules from data/ without regenerating from raw reads.
+ - "raw/optional" = large upstream products; include for full reproducibility but the
+   figures/tables reproduce from the "core" set alone. Gzip the big text/gff/gtf files.
+ - After the Zenodo release: paste the DOI into README (badge + section 1) and into the
+   manuscript's Data/Code Availability statements, and set the repo URL to
+   https://github.com/RJEGR/microRNA-abalone-acidification
+================================================================================

@@ -1,0 +1,177 @@
+## --- paths centralised in config.R (were absolute ~/Documents/MIRNA_HALIOTIS & /Users/cigom paths) ---
+if (file.exists("config.R")) source("config.R") else if (file.exists("../config.R")) source("../config.R")
+if (!exists("DATA_DIR"))    DATA_DIR    <- if (dir.exists("data")) "data" else "../data"
+if (!exists("RESULTS_DIR")) RESULTS_DIR <- file.path(dirname(DATA_DIR), "outputs")
+if (!exists("ANNOT_DIR"))   ANNOT_DIR   <- file.path(DATA_DIR, "annotation")
+dir.create(RESULTS_DIR, showWarnings = FALSE, recursive = TRUE)
+
+# RICARDO GOMEZ REYES
+# CREAR UN CODIGO LIMPIO EN EL QUE OCURRA LO SIGUIENTE:
+# 1) LEA LOS ARCHIVOS DE RNAHYBRID Y TARGETSCAN
+# 2) CURE LOS RESULTADOS A UN FORMATO COMPATIBLE PARA HACER BIND DE AMBOS OBJETOS
+# 3) CREE UNA COLUMNA NUEVA INDIQUE SI LA PREDICCION FUE RESUELTA EN AMBAS HERRAMIENTAS O ALGUNA
+# 4) ALMACENE UN ARCHIVO DE NOMBRE SRNA_FUNCTION_PREDICTED.TSV PARA SUBSECUENTES ANALISIS
+
+# LAS COLUMNAS CONTENIDAS DEBEN SER: 
+# seqnames, 
+# gene_coords (start:end:strand), 
+# gene_id (related to UTR) <- key value for step 3_ 
+# target_id (Ids from UTR.fasta used during the target analysis)
+# query_id (Names from shortstacks DB)
+# n (# srnas, if unique target n == 1, else UTR is binding site by multiple mirs)
+# predicted_at (targetscan, rnahybrid, or both)
+
+rm(list = ls())
+
+if(!is.null(dev.list())) dev.off()
+
+options(stringsAsFactors = FALSE, readr.show_col_types = FALSE)
+
+library(tidyverse)
+
+wd <- paste0(ANNOT_DIR, "/")
+
+# 1) ====
+
+pattern <- "mir_vs_utr_rmdup_RNAhybrid.out.psig.tsv"
+
+f <- list.files(path = wd, pattern = pattern, full.names = T)
+
+# AFTER CLEAN RNAHYBRID pval < 0.05, JUST LOAD .out.psig.tsv file:
+
+RNAHYBRID <- read_tsv(f)
+
+# TARGETSCAN INCLUDE ONLY 3 UTR FROM psig RNAHybrid detection
+
+f <- "mature_star_mir_vs_mir_vs_utr_rmdup_RNAhybrid.out.psig_targetscan.out"
+
+f <- list.files(path = wd, pattern = f, full.names = T)
+
+TARGETSCAN <- read_tsv(f)
+
+# BIND TO TARGETSCAN, UPGRADE VERSION OF RESIDUAL 16 MIRS
+
+f <- "mir_ts_vs_three_prime_utr_rmdup_ts_targetscan.out"
+
+f <- list.files(path = wd, pattern = f, full.names = T)
+
+TARGETSCAN <- read_tsv(f) %>%
+  mutate(miRNA_family_ID = paste0(miRNA_family_ID, ".mature")) %>%
+  rbind(TARGETSCAN, .)
+
+
+nrow(TARGETSCAN %>% distinct(miRNA_family_ID) %>% filter(grepl("mature", miRNA_family_ID))) # MUST BE 147
+
+
+# 2) ====
+# 2.1) PREPARE UTR INFO ====
+
+# from gene feature to UTR (flat information)
+
+utr_f <- list.files(path = wd, full.names = T, pattern = "three_prime_utr.ids")
+
+str(x <- read_lines(utr_f)) # 54 432 <-- i.e the N sequences from three_prime_utr.fa
+
+str(gene_id <- sapply(strsplit(x, " "), `[`, 2)) # LOC*
+
+str(target <- sapply(strsplit(x, " "), `[`, 1)) # three_prime_utr ids 
+
+nrow(utr_source <- data.frame(target, gene_id) %>% as_tibble()) # 54 432
+
+nrow(utr_source <- utr_source %>% distinct(target, gene_id)) # 31,654
+
+
+# 2.2) =====
+utr <- sapply(strsplit(x, " "), `[`, 1)
+
+RNAHYBRID <- RNAHYBRID %>%
+  mutate(query = sapply(strsplit(query, "::"), `[`, 1) ) %>%
+  dplyr::select(target, query) %>%
+  dplyr::filter(target %in% utr) %>% # <- keep only 3'utr
+  dplyr::mutate(predicted = "RNAHYBRID") %>%
+  dplyr::filter(grepl(".mature", query))
+
+
+# BIND TO RNAHybrid, UPGRADE VERSION OF RESIDUAL 17 MIRS
+
+pattern <- "UPGRADE_MIRS_TARGETS_vs_three_prime_utr_RNAhybrid.tsv"
+
+f <- list.files(path = wd, pattern = pattern, full.names = T)
+
+# AFTER CLEAN RNAHYBRID pval < 0.05, JUST LOAD .out.psig.tsv file:
+
+# RNAHYBRID <- read_tsv(f, col_names = F)
+# colNames <- c("target", "query", "mfe", "pval", "pos", "lenT", "lenQ")
+# colnames(RNAHYBRID) <- colNames
+
+RNAHYBRID <- read_tsv(f, col_names = F) %>% 
+  dplyr::rename("target"="X1", "query"="X2" ,"pval" = "X4") %>%
+  dplyr::filter(pval < 0.05) %>%
+  dplyr::select(target, query) %>%
+  dplyr::filter(target %in% utr) %>% # <- keep only 3'utr
+  dplyr::mutate(predicted = "RNAHYBRID", query = paste0(query, ".mature")) %>%
+  rbind(RNAHYBRID, .)
+
+nrow(RNAHYBRID %>% distinct(query) %>% filter(grepl(".mature", query))) # MUST BE 147
+
+# 2.3)
+
+TARGETSCAN <- TARGETSCAN %>% 
+  dplyr::select(a_Gene_ID, miRNA_family_ID) %>%
+  dplyr::mutate(miRNA_family_ID = sapply(strsplit(miRNA_family_ID, "::"), `[`, 1) ) %>%
+  tidyr::separate(a_Gene_ID, into = c("target", "gene_id"), sep = ";") %>%
+  dplyr::rename("query" = "miRNA_family_ID") %>%
+  dplyr::select(target, query) %>%
+  dplyr::mutate(predicted = "TARGETSCAN")
+
+TARGETSCAN <- TARGETSCAN %>% filter(grepl(".mature", query))
+
+identical(names(TARGETSCAN), names(RNAHYBRID))
+
+# 3) ====
+
+paste_ids <- function(x) { 
+  x <- x[!is.na(x)] 
+  x <- unique(sort(x))
+  x <- paste(x, sep = ';', collapse = ';') 
+  }
+
+which_tools <- function(x) { 
+  x <- x[!is.na(x)] 
+  n <- length(unique(x))
+  x <- unique(x)
+  
+  if(n > 1) {
+    x <- "BOTH"
+  } else
+  x <- paste(x, sep = '|', collapse = '|') }
+
+
+RNAHYBRID %>% distinct(target)
+TARGETSCAN %>% distinct(target)
+
+out <- rbind(RNAHYBRID, TARGETSCAN) %>%
+  # sample_n(100) %>%
+  group_by(target) %>%
+  summarise(
+    across(query, .fns = paste_ids), 
+    across(predicted, .fns = which_tools), 
+    n_rnas = n(),
+    .groups = "drop_last")
+
+out %>% dplyr::count(predicted)
+
+out %>% distinct(target)
+
+
+nrow(out) # 6370 different 3' utrs predicted to be target by srna
+
+# ES NECESESARIO CARGARA LAS ANOTACIONES  A NIVEL GENOMA Y TRANSCRIPTOMA:
+
+nrow(out <- out %>% left_join(utr_source, by = "target") %>% arrange(desc(n_rnas)))
+
+# out <- out %>% select(target, query, n_rnas, predicted)
+
+write_rds(out, file = paste0(wd, "SRNA_FUNCTION_PREDICTED.rds"))
+
+
