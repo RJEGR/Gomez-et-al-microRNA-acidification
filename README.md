@@ -3,7 +3,7 @@
 Reproducibility repository for the manuscript:
 
 > **A microRNA catalogue for red abalone larvae reveals developmental and acidification-associated abundance patterns**
-> Marine Biotechnology 28: 165. doi: 10.1007/s10126-026-10715-1.
+> Marine Biotechnology 28: 165. doi: [10.1007/s10126-026-10715-1](https://link.springer.com/article/10.1007/s10126-026-10715-1).
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22709806.svg)](https://doi.org/10.5281/zenodo.22709806)
 
